@@ -31,9 +31,10 @@ const manager = new CanisterManager({
   dfxNetwork: 'local', // or 'ic' for mainnet
   staticIpAddress: '192.168.0.210', // Your static IP address for external access
   // Optional: customize ports
-  replicaPort: 4943,
-  canisterPort: 14943,
-  internetIdentityPort: 24943,
+  replicaPort: 4943, // Required for local development
+  // The following ports are only needed when accessing from a smartphone
+  canisterPort: 14943, // For canister communication via SSL
+  internetIdentityPort: 24943, // For Internet Identity via SSL
 });
 
 // Create an actor for your canister
@@ -68,10 +69,17 @@ The manager automatically handles different environments:
   - Internet Identity: `https://identity.ic0.app`
 
 - For local development (`dfxNetwork: 'local'`):
-  - Supports Chrome's localhost subdomains
-  - Falls back to query parameter URLs for other browsers
-  - Customizable ports for replica, canister, and Internet Identity
-  - Expo development server support for mobile app testing
+  - Chrome: Supports localhost subdomains (`http://<canister-id>.localhost:4943`)
+  - Other browsers: Falls back to query parameter URLs
+  - Smartphone access: Requires SSL configuration with custom ports
+
+#### Port Configuration
+
+- `replicaPort` (default: 4943): Required for local development
+- `canisterPort` (default: 14943): Only needed for smartphone access via SSL
+- `internetIdentityPort` (default: 24943): Only needed for smartphone access via SSL
+
+When developing locally with Chrome, you only need to specify the `replicaPort`. The other ports are only required when you need to access the local development server from a smartphone.
 
 #### SSL Configuration for Local Development
 
@@ -231,8 +239,8 @@ const manager = new CanisterManager({
   staticIpAddress: '192.168.0.210', // Your static IP address for external access
   // Use default ports unless you've configured custom ones
   replicaPort: 4943,
-  canisterPort: 14943,
-  internetIdentityPort: 24943,
+  canisterPort: 14943, // Only needed for smartphone access
+  internetIdentityPort: 24943, // Only needed for smartphone access
 });
 ```
 
@@ -280,9 +288,9 @@ type CanisterManagerConfig = {
   staticIpAddress: string;
   /** Port for the local replica (default: 4943) */
   replicaPort?: number;
-  /** Port for canister communication (default: 14943) */
+  /** Port for canister communication via SSL (default: 14943). Only needed for smartphone access. */
   canisterPort?: number;
-  /** Port for Internet Identity (default: 24943) */
+  /** Port for Internet Identity via SSL (default: 24943). Only needed for smartphone access. */
   internetIdentityPort?: number;
 };
 ```

@@ -17,9 +17,9 @@ type CanisterManagerConfig = {
   staticIpAddress: string;
   /** Port for the local replica (default: 4943) */
   replicaPort?: number;
-  /** Port for canister communication (default: 14943) */
+  /** Port for canister communication via SSL (default: 14943). Only needed for smartphone access. */
   canisterPort?: number;
-  /** Port for Internet Identity (default: 24943) */
+  /** Port for Internet Identity via SSL (default: 24943). Only needed for smartphone access. */
   internetIdentityPort?: number;
 };
 
@@ -52,6 +52,9 @@ export class CanisterManager {
    * Creates a new instance of CanisterManager
    *
    * @param config - Configuration options for the CanisterManager
+   * @remarks
+   * - For local development with Chrome, only replicaPort is required
+   * - canisterPort and internetIdentityPort are only needed when accessing from a smartphone
    */
   constructor({
     dfxNetwork,
@@ -116,6 +119,9 @@ export class CanisterManager {
    *
    * @param canisterId - The ID of the canister
    * @returns The URL for backend canister communication
+   * @remarks
+   * - For mainnet, returns ic0.app URL
+   * - For local development, returns URL with canisterPort (for smartphone access)
    */
   getBackendCanisterURL = (canisterId: string): string => {
     if (this.dfxNetwork !== 'local') {
@@ -130,6 +136,11 @@ export class CanisterManager {
    *
    * @param canisterId - The ID of the canister
    * @returns The URL for frontend canister access
+   * @remarks
+   * - For mainnet, returns ic0.app URL
+   * - For local development:
+   *   - Chrome: Returns localhost subdomain URL
+   *   - Other browsers: Returns URL with canisterPort (for smartphone access)
    */
   getFrontendCanisterURL = (canisterId: string): string => {
     if (this.dfxNetwork !== 'local') {
@@ -148,6 +159,11 @@ export class CanisterManager {
    *
    * @param canisterId - The ID of the canister
    * @returns The URL for Internet Identity service
+   * @remarks
+   * - For mainnet, returns identity.ic0.app
+   * - For local development:
+   *   - Chrome: Returns localhost subdomain URL
+   *   - Other browsers: Returns URL with internetIdentityPort (for smartphone access)
    */
   getInternetIdentityURL = (canisterId: string): string => {
     if (this.dfxNetwork !== 'local') {
@@ -165,6 +181,9 @@ export class CanisterManager {
    * Checks if localhost subdomain support is available
    *
    * @returns boolean indicating if localhost subdomains are supported
+   * @remarks
+   * - Currently only Chrome supports localhost subdomains
+   * - Other browsers require using canisterPort and internetIdentityPort for local development
    */
   isLocalhostSubdomainSupported = (): boolean => {
     if (!window?.location?.origin?.includes('localhost')) {
@@ -187,6 +206,9 @@ export class CanisterManager {
    *
    * @param canisterId - The ID of the canister
    * @returns The localhost subdomain URL for the canister
+   * @remarks
+   * - Only used when running in Chrome on localhost
+   * - Uses replicaPort instead of canisterPort or internetIdentityPort
    */
   getLocalhostSubdomainCanisterURL = (canisterId: string): string => {
     return `http://${canisterId}.localhost:${this.replicaPort}`;
