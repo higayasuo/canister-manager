@@ -1,0 +1,26 @@
+# Source files
+src/
+__tests__/
+
+# Configuration files
+.eslintrc.json
+.eslintignore
+.gitignore
+.npmrc
+tsconfig.json
+vitest.config.ts
+
+# Development files
+.vscode/
+.idea/
+*.log
+coverage/
+node_modules/
+
+# Build files
+dist/*.test.js
+dist/*.spec.js
+
+# Documentation
+CHANGELOG.md
+CONTRIBUTING.md
