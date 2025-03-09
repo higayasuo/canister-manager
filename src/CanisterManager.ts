@@ -1,20 +1,11 @@
-import {
-  Actor,
-  HttpAgent,
-  ActorSubclass,
-  Identity,
-  AnonymousIdentity,
-} from '@dfinity/agent';
-import { IDL } from '@dfinity/candid';
-
 /**
  * Configuration options for the CanisterManager
  */
 type CanisterManagerConfig = {
   /** The DFX network to connect to (e.g., 'local', 'ic') */
   dfxNetwork: string;
-  /** Static IP address for external access to local development server */
-  staticIpAddress: string;
+  /** Local IP address for external access to local development server */
+  localIPAddress: string;
   /** Port for the local replica (default: 4943) */
   replicaPort?: number;
   /** Port for canister communication via SSL (default: 14943). Only needed for smartphone access. */
@@ -24,26 +15,15 @@ type CanisterManagerConfig = {
 };
 
 /**
- * Parameters for creating an actor instance
- */
-type CreateActorParams = {
-  /** The ID of the canister to connect to */
-  canisterId: string;
-  /** The Candid interface factory for the canister */
-  interfaceFactory: IDL.InterfaceFactory;
-  /** Optional identity for authentication (defaults to AnonymousIdentity) */
-  identity?: Identity;
-};
-
-/**
  * A utility class for managing ICP canisters and their interactions
  *
- * This class provides methods to create actors, manage canister URLs,
- * and handle different network environments (local vs. mainnet).
+ * This class provides methods to manage canister URLs and handle different
+ * network environments (local vs. mainnet). It supports both local development
+ * with Chrome's localhost subdomain feature and smartphone access via SSL.
  */
 export class CanisterManager {
   private dfxNetwork: string;
-  private staticIpAddress: string;
+  private localIPAddress: string;
   private replicaPort: number;
   private canisterPort: number;
   private internetIdentityPort: number;
@@ -58,61 +38,17 @@ export class CanisterManager {
    */
   constructor({
     dfxNetwork,
-    staticIpAddress,
+    localIPAddress,
     replicaPort = 4943,
     canisterPort = 14943,
     internetIdentityPort = 24943,
   }: CanisterManagerConfig) {
     this.dfxNetwork = dfxNetwork;
-    this.staticIpAddress = staticIpAddress;
+    this.localIPAddress = localIPAddress;
     this.replicaPort = replicaPort;
     this.canisterPort = canisterPort;
     this.internetIdentityPort = internetIdentityPort;
   }
-
-  /**
-   * Creates an actor instance for interacting with a canister
-   *
-   * @param params - Parameters for creating the actor
-   * @returns An actor instance that can be used to call canister methods
-   */
-  createActor = <T>({
-    canisterId,
-    interfaceFactory,
-    identity = new AnonymousIdentity(),
-  }: CreateActorParams): ActorSubclass<T> => {
-    const host = this.getBackendCanisterURL(canisterId);
-
-    const httpAgentOptions = {
-      host,
-      identity,
-      // fetchOptions: {
-      //   reactNative: {
-      //     __nativeResponseType: 'base64',
-      //   },
-      // },
-      // callOptions: {
-      //   reactNative: {
-      //     textStreaming: true,
-      //   },
-      // },
-    };
-
-    const agent = new HttpAgent(httpAgentOptions);
-
-    if (this.dfxNetwork === 'local') {
-      agent.fetchRootKey().catch((err) => {
-        console.warn(`Your local replica is not running: ${host}`);
-        console.error(err);
-        throw err;
-      });
-    }
-
-    return Actor.createActor<T>(interfaceFactory, {
-      agent,
-      canisterId,
-    });
-  };
 
   /**
    * Gets the backend URL for a canister
@@ -121,14 +57,20 @@ export class CanisterManager {
    * @returns The URL for backend canister communication
    * @remarks
    * - For mainnet, returns ic0.app URL
-   * - For local development, returns URL with canisterPort (for smartphone access)
+   * - For local development:
+   *   - When on localhost: Returns localhost URL with replicaPort
+   *   - When accessing externally: Returns URL with canisterPort
    */
   getBackendCanisterURL = (canisterId: string): string => {
     if (this.dfxNetwork !== 'local') {
       return `https://${canisterId}.ic0.app`;
     }
 
-    return `https://${this.staticIpAddress}:${this.canisterPort}/?canisterId=${canisterId}`;
+    if (window?.location?.origin?.includes('localhost')) {
+      return `http://localhost:${this.replicaPort}/?canisterId=${canisterId}`;
+    }
+
+    return `https://${this.localIPAddress}:${this.canisterPort}/?canisterId=${canisterId}`;
   };
 
   /**
@@ -151,7 +93,7 @@ export class CanisterManager {
       return this.getLocalhostSubdomainCanisterURL(canisterId);
     }
 
-    return `https://${this.staticIpAddress}:${this.canisterPort}/?canisterId=${canisterId}`;
+    return `https://${this.localIPAddress}:${this.canisterPort}/?canisterId=${canisterId}`;
   };
 
   /**
@@ -174,7 +116,7 @@ export class CanisterManager {
       return this.getLocalhostSubdomainCanisterURL(canisterId);
     }
 
-    return `https://${this.staticIpAddress}:${this.internetIdentityPort}/?canisterId=${canisterId}`;
+    return `https://${this.localIPAddress}:${this.internetIdentityPort}/?canisterId=${canisterId}`;
   };
 
   /**

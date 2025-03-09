@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2024-03-08
+
+### Changed
+
+- Removed `createActor` functionality to focus on URL management
+- Removed dependencies on `@dfinity/agent` and `@dfinity/candid`
+- Simplified the package to focus on core URL generation features
+
+## [0.1.2] - 2024-03-08
+
+### Changed
+
+- Renamed `staticIpAddress` to `localIPAddress` for better clarity and alignment with local development terminology
+
 ## [0.1.1] - 2024-03-08
 
 ### Fixed

@@ -1,16 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CanisterManager } from '../src/CanisterManager';
-import { HttpAgent, AnonymousIdentity } from '@dfinity/agent';
-import { IDL } from '@dfinity/candid';
-
-// Mock the @dfinity/agent module
-vi.mock('@dfinity/agent', () => ({
-  Actor: {
-    createActor: vi.fn(),
-  },
-  HttpAgent: vi.fn(),
-  AnonymousIdentity: vi.fn(),
-}));
 
 // Create a minimal mock of the Window interface
 const createMockWindow = (
@@ -115,7 +104,7 @@ describe('CanisterManager', () => {
   let manager: CanisterManager;
   const mockConfig = {
     dfxNetwork: 'local',
-    staticIpAddress: 'localhost',
+    localIPAddress: 'localhost',
     replicaPort: 4943,
     canisterPort: 14943,
     internetIdentityPort: 24943,
@@ -133,7 +122,7 @@ describe('CanisterManager', () => {
     it('should initialize with only replicaPort for Chrome local development', () => {
       const manager = new CanisterManager({
         dfxNetwork: 'local',
-        staticIpAddress: 'localhost',
+        localIPAddress: 'localhost',
         replicaPort: 4943,
       });
 
@@ -143,7 +132,7 @@ describe('CanisterManager', () => {
     it('should initialize with all ports for smartphone access', () => {
       const customPorts = {
         dfxNetwork: 'local',
-        staticIpAddress: 'localhost',
+        localIPAddress: 'localhost',
         replicaPort: 4943,
         canisterPort: 14943,
         internetIdentityPort: 24943,
@@ -151,66 +140,6 @@ describe('CanisterManager', () => {
 
       const manager = new CanisterManager(customPorts);
       expect(manager).toBeDefined();
-    });
-  });
-
-  describe('createActor', () => {
-    const mockCanisterId = 'test-canister-id';
-    const mockInterfaceFactory = {} as IDL.InterfaceFactory;
-    const mockIdentity = new AnonymousIdentity();
-
-    beforeEach(() => {
-      // Mock HttpAgent constructor
-      (HttpAgent as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-        () => ({
-          fetchRootKey: vi.fn().mockResolvedValue(undefined),
-        }),
-      );
-    });
-
-    it('should create an actor with default anonymous identity', () => {
-      manager.createActor({
-        canisterId: mockCanisterId,
-        interfaceFactory: mockInterfaceFactory,
-      });
-
-      expect(HttpAgent).toHaveBeenCalledWith(
-        expect.objectContaining({
-          host: expect.stringContaining(mockCanisterId),
-          identity: expect.any(AnonymousIdentity),
-        }),
-      );
-    });
-
-    it('should create an actor with provided identity', () => {
-      manager.createActor({
-        canisterId: mockCanisterId,
-        interfaceFactory: mockInterfaceFactory,
-        identity: mockIdentity,
-      });
-
-      expect(HttpAgent).toHaveBeenCalledWith(
-        expect.objectContaining({
-          host: expect.stringContaining(mockCanisterId),
-          identity: mockIdentity,
-        }),
-      );
-    });
-
-    it('should fetch root key for local network', async () => {
-      const mockAgent = {
-        fetchRootKey: vi.fn().mockResolvedValue(undefined),
-      };
-      (HttpAgent as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-        () => mockAgent,
-      );
-
-      await manager.createActor({
-        canisterId: mockCanisterId,
-        interfaceFactory: mockInterfaceFactory,
-      });
-
-      expect(mockAgent.fetchRootKey).toHaveBeenCalled();
     });
   });
 
@@ -228,10 +157,24 @@ describe('CanisterManager', () => {
         expect(url).toBe(`https://${mockCanisterId}.ic0.app`);
       });
 
-      it('should return SSL URL for smartphone access', () => {
+      it('should return localhost URL when on localhost', () => {
+        global.window = createMockWindow('http://localhost:3000', 'Chrome');
+
         const url = manager.getBackendCanisterURL(mockCanisterId);
         expect(url).toBe(
-          `https://${mockConfig.staticIpAddress}:${mockConfig.canisterPort}/?canisterId=${mockCanisterId}`,
+          `http://localhost:${mockConfig.replicaPort}/?canisterId=${mockCanisterId}`,
+        );
+      });
+
+      it('should return SSL URL when accessing externally', () => {
+        global.window = createMockWindow(
+          'https://192.168.1.100:3000',
+          'Chrome',
+        );
+
+        const url = manager.getBackendCanisterURL(mockCanisterId);
+        expect(url).toBe(
+          `https://${mockConfig.localIPAddress}:${mockConfig.canisterPort}/?canisterId=${mockCanisterId}`,
         );
       });
     });
@@ -263,7 +206,7 @@ describe('CanisterManager', () => {
 
         const url = manager.getFrontendCanisterURL(mockCanisterId);
         expect(url).toBe(
-          `https://${mockConfig.staticIpAddress}:${mockConfig.canisterPort}/?canisterId=${mockCanisterId}`,
+          `https://${mockConfig.localIPAddress}:${mockConfig.canisterPort}/?canisterId=${mockCanisterId}`,
         );
       });
     });
@@ -295,7 +238,7 @@ describe('CanisterManager', () => {
 
         const url = manager.getInternetIdentityURL(mockCanisterId);
         expect(url).toBe(
-          `https://${mockConfig.staticIpAddress}:${mockConfig.internetIdentityPort}/?canisterId=${mockCanisterId}`,
+          `https://${mockConfig.localIPAddress}:${mockConfig.internetIdentityPort}/?canisterId=${mockCanisterId}`,
         );
       });
     });
