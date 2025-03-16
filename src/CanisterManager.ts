@@ -1,3 +1,12 @@
+import {
+  Actor,
+  ActorSubclass,
+  HttpAgent,
+  AnonymousIdentity,
+  Identity,
+} from '@dfinity/agent';
+import { IDL } from '@dfinity/candid';
+
 /**
  * Configuration options for the CanisterManager
  */
@@ -12,6 +21,15 @@ type CanisterManagerConfig = {
   canisterPort?: number;
   /** Port for Internet Identity via SSL (default: 24943). Only needed for smartphone access. */
   internetIdentityPort?: number;
+};
+
+/**
+ * Parameters for creating an actor.
+ */
+type CreateActorParams = {
+  canisterId: string;
+  interfaceFactory: IDL.InterfaceFactory;
+  identity?: Identity;
 };
 
 /**
@@ -154,5 +172,42 @@ export class CanisterManager {
    */
   getLocalhostSubdomainCanisterURL = (canisterId: string): string => {
     return `http://${canisterId}.localhost:${this.replicaPort}`;
+  };
+
+  createActor = <T>({
+    canisterId,
+    interfaceFactory,
+    identity = new AnonymousIdentity(),
+  }: CreateActorParams): ActorSubclass<T> => {
+    const host = this.getBackendCanisterURL(canisterId);
+    const httpAgentOptions = {
+      host,
+      identity,
+      // fetchOptions: {
+      //   reactNative: {
+      //     __nativeResponseType: 'base64',
+      //   },
+      // },
+      // callOptions: {
+      //   reactNative: {
+      //     textStreaming: true,
+      //   },
+      // },
+    };
+
+    const agent = new HttpAgent(httpAgentOptions);
+
+    if (this.dfxNetwork === 'local') {
+      agent.fetchRootKey().catch((err) => {
+        console.warn(`Your local replica is not running: ${host}`);
+        console.error(err);
+        throw err;
+      });
+    }
+
+    return Actor.createActor<T>(interfaceFactory, {
+      agent,
+      canisterId,
+    });
   };
 }

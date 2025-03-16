@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2024-03-16
+
+### Removed
+
+- Removed `createActor` method and related types
+- Removed dependencies on `@dfinity/agent` and `@dfinity/candid`
+
+### Changed
+
+- Simplified package to focus solely on URL management functionality
+- Updated documentation to reflect removal of actor creation functionality
+
 ## [0.1.3] - 2024-03-08
 
 ### Changed

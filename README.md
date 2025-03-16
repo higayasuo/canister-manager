@@ -4,10 +4,9 @@ A utility to make ICP Canisters easier to handle. This package provides a simple
 
 ## Features
 
-- Easy canister actor creation
 - Automatic URL management for local and mainnet environments
 - Support for localhost subdomains in Chrome
-- Internet Identity integration
+- Internet Identity URL management
 - TypeScript support
 - SSL configuration support for local development
 - Expo development server support
@@ -18,31 +17,30 @@ A utility to make ICP Canisters easier to handle. This package provides a simple
 npm install canister-manager
 ```
 
+### Peer Dependencies
+
+This package requires the following peer dependencies:
+
+```bash
+npm install @dfinity/agent@^0.20.0 @dfinity/candid@^0.20.0
+```
+
 ## Usage
 
 ### Basic Setup
 
 ```typescript
 import { CanisterManager } from 'canister-manager';
-import { IDL } from '@dfinity/candid';
 
 // Initialize the manager
 const manager = new CanisterManager({
   dfxNetwork: 'local', // or 'ic' for mainnet
-  staticIpAddress: '192.168.0.210', // Your static IP address for external access
+  localIPAddress: '192.168.0.210', // Your local IP address for external access
   // Optional: customize ports
   replicaPort: 4943, // Required for local development
   // The following ports are only needed when accessing from a smartphone
   canisterPort: 14943, // For canister communication via SSL
   internetIdentityPort: 24943, // For Internet Identity via SSL
-});
-
-// Create an actor for your canister
-const actor = manager.createActor({
-  canisterId: 'your-canister-id',
-  interfaceFactory: yourCanisterIDL, // Your canister's Candid interface
-  // Optional: provide custom identity
-  identity: yourCustomIdentity,
 });
 ```
 
@@ -236,7 +234,7 @@ These commands do the following:
 ```typescript
 const manager = new CanisterManager({
   dfxNetwork: 'local',
-  staticIpAddress: '192.168.0.210', // Your static IP address for external access
+  localIPAddress: '192.168.0.210', // Your local IP address for external access
   // Use default ports unless you've configured custom ones
   replicaPort: 4943,
   canisterPort: 14943, // Only needed for smartphone access
@@ -284,8 +282,8 @@ const manager = new CanisterManager({
 type CanisterManagerConfig = {
   /** The DFX network to connect to (e.g., 'local', 'ic') */
   dfxNetwork: string;
-  /** Static IP address for external access to local development server */
-  staticIpAddress: string;
+  /** Local IP address for external access to local development server */
+  localIPAddress: string;
   /** Port for the local replica (default: 4943) */
   replicaPort?: number;
   /** Port for canister communication via SSL (default: 14943). Only needed for smartphone access. */
