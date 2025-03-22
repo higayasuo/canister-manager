@@ -1,6 +1,6 @@
 {
   "name": "canister-manager",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A utility to make ICP Canisters easier to handle. This package provides a simple interface for managing Internet Computer (ICP) canisters, handling both local development and mainnet environments.",
   "type": "module",
   "main": "dist/index.js",

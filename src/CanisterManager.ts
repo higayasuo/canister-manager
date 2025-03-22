@@ -104,7 +104,7 @@ export class CanisterManager {
    */
   getFrontendCanisterURL = (canisterId: string): string => {
     if (this.dfxNetwork !== 'local') {
-      return `https://${canisterId}.ic0.app`;
+      return `https://${canisterId}.icp0.io`;
     }
 
     if (this.isLocalhostSubdomainSupported()) {

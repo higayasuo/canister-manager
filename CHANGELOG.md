@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.5] - 2024-03-16
+
+### Changed
+
+- Updated frontend canister URLs to use `icp0.io` domain instead of `ic0.app` for mainnet
+- Updated documentation to clarify the difference between backend and frontend URLs
+
 ## [0.1.4] - 2024-03-16
 
 ### Removed

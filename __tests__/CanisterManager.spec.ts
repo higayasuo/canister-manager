@@ -187,7 +187,7 @@ describe('CanisterManager', () => {
         });
 
         const url = manager.getFrontendCanisterURL(mockCanisterId);
-        expect(url).toBe(`https://${mockCanisterId}.ic0.app`);
+        expect(url).toBe(`https://${mockCanisterId}.icp0.io`);
       });
 
       it('should return localhost subdomain URL for Chrome', () => {

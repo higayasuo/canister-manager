@@ -63,7 +63,8 @@ The manager automatically handles different environments:
 
 - For mainnet (`dfxNetwork: 'ic'`):
 
-  - Canister URLs: `https://<canister-id>.ic0.app`
+  - Backend URLs: `https://<canister-id>.ic0.app`
+  - Frontend URLs: `https://<canister-id>.icp0.io`
   - Internet Identity: `https://identity.ic0.app`
 
 - For local development (`dfxNetwork: 'local'`):
