@@ -22,7 +22,7 @@ npm install canister-manager
 This package requires the following peer dependencies:
 
 ```bash
-npm install @dfinity/agent@^0.20.0 @dfinity/candid@^0.20.0
+npm install @dfinity/agent @dfinity/candid
 ```
 
 ## Usage
